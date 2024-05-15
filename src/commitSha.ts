@@ -240,7 +240,10 @@ export const getSHAForNonPullRequestEvent = async ({
       }
     } else if (isTag) {
       core.debug('Getting previous SHA for tag...')
-      const {sha, tag} = await getPreviousGitTag({cwd: workingDirectory})
+      const {sha, tag} = await getPreviousGitTag({
+        cwd: workingDirectory,
+        pattern: inputs.previousTagPattern
+      })
       previousSha = sha
       targetBranch = tag
     } else {

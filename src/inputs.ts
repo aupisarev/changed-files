@@ -57,6 +57,7 @@ export type Inputs = {
   excludeSubmodules: boolean
   fetchMissingHistoryMaxRetries?: number
   usePosixPathSeparator: boolean
+  previousTagPattern: string
 }
 
 export const getInputs = (): Inputs => {
@@ -259,6 +260,10 @@ export const getInputs = (): Inputs => {
     }
   )
 
+  const previousTagPattern = core.getInput('previous_tag_pattern', {
+    required: false
+  })
+
   const inputs: Inputs = {
     files,
     filesSeparator,
@@ -300,6 +305,7 @@ export const getInputs = (): Inputs => {
     dirNamesDeletedFilesIncludeOnlyDeletedDirs,
     excludeSubmodules,
     usePosixPathSeparator,
+    previousTagPattern,
     // End Not Supported via REST API
     dirNames,
     dirNamesExcludeCurrentDir,

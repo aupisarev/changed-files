@@ -235,6 +235,10 @@ inputs:
     description: "Use POSIX path separator `/` for output file paths on Windows."
     required: false
     default: "false"
+  previous_tag_pattern:
+     description: "Specify a regexp pattern for tag used for comparing changes"
+     required: false
+     default: ""
 
 outputs:
   added_files:

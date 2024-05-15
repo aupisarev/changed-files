@@ -1055,7 +1055,10 @@ const getSHAForNonPullRequestEvent = (_j) => __awaiter(void 0, [_j], void 0, fun
         }
         else if (isTag) {
             core.debug('Getting previous SHA for tag...');
-            const { sha, tag } = yield (0, utils_1.getPreviousGitTag)({ cwd: workingDirectory });
+            const { sha, tag } = yield (0, utils_1.getPreviousGitTag)({
+                cwd: workingDirectory,
+                pattern: inputs.previousTagPattern
+            });
             previousSha = sha;
             targetBranch = tag;
         }
@@ -1388,7 +1391,8 @@ exports.DEFAULT_VALUES_OF_UNSUPPORTED_API_INPUTS = {
     dirNamesDeletedFilesIncludeOnlyDeletedDirs: false,
     excludeSubmodules: false,
     fetchMissingHistoryMaxRetries: 10,
-    usePosixPathSeparator: false
+    usePosixPathSeparator: false,
+    previousTagPattern: ''
 };
 
 
@@ -1610,6 +1614,9 @@ const getInputs = () => {
     const usePosixPathSeparator = core.getBooleanInput('use_posix_path_separator', {
         required: false
     });
+    const previousTagPattern = core.getInput('previous_tag_pattern', {
+        required: false
+    });
     const inputs = {
         files,
         filesSeparator,
@@ -1651,6 +1658,7 @@ const getInputs = () => {
         dirNamesDeletedFilesIncludeOnlyDeletedDirs,
         excludeSubmodules,
         usePosixPathSeparator,
+        previousTagPattern,
         // End Not Supported via REST API
         dirNames,
         dirNamesExcludeCurrentDir,
@@ -2604,17 +2612,24 @@ const cleanShaInput = (_5) => __awaiter(void 0, [_5], void 0, function* ({ sha, 
     return stdout.trim();
 });
 exports.cleanShaInput = cleanShaInput;
-const getPreviousGitTag = (_6) => __awaiter(void 0, [_6], void 0, function* ({ cwd }) {
+const getPreviousGitTag = (_6) => __awaiter(void 0, [_6], void 0, function* ({ cwd, pattern }) {
     const { stdout } = yield exec.getExecOutput('git', ['tag', '--sort=-creatordate'], {
         cwd,
         silent: !core.isDebug()
     });
     const tags = stdout.trim().split('\n');
-    if (tags.length < 2) {
+    tags.shift();
+    let previousTag = '';
+    if (pattern) {
+        previousTag = tags.find(value => value.match(pattern)) || '';
+    }
+    else if (tags.length > 0) {
+        previousTag = tags[0];
+    }
+    if (!previousTag) {
         core.warning('No previous tag found');
         return { tag: '', sha: '' };
     }
-    const previousTag = tags[1];
     const { stdout: stdout2 } = yield exec.getExecOutput('git', ['rev-parse', previousTag], {
         cwd,
         silent: !core.isDebug()
